@@ -1,0 +1,25 @@
+{
+  "settings": {
+       "refresh_interval" : "1s"
+  },
+  "mappings": {
+    {%- if routing | default(false) -%}
+    "_routing": {
+      "required": true
+    },
+    {%- endif -%}
+    "properties": {
+      "partition_id": {
+        "type": "keyword"
+      },
+      "emb": {
+        "type": "dense_vector",
+        "index": true,
+        "similarity": "cosine",
+        "index_options": {
+          "type": {{ vector_index_type | default("flat") | tojson }}
+        }
+      }
+    }
+  }
+}

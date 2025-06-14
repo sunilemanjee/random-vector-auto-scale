@@ -1,0 +1,38 @@
+PUT _ingest/pipeline/add-timestamp
+{
+  "description": "Add @timestamp if missing for openai data stream",
+  "processors": [
+    {
+      "set": {
+        "field": "@timestamp",
+        "value": "{{_ingest.timestamp}}"
+      }
+    }
+  ],
+  "on_failure": [
+    {
+      "set": {
+        "field": "_index",
+        "value": "my-error"
+      }
+    },
+    {
+      "set": {
+        "field": "error.message",
+        "value": "{{ _ingest.on_failure_message }}"
+      }
+    },
+    {
+      "set": {
+        "field": "error.processor_type",
+        "value": "{{ _ingest.on_failure_processor_type }}"
+      }
+    },
+    {
+      "set": {
+        "field": "error.timestamp",
+        "value": "{{_ingest.timestamp}}"
+      }
+    }
+  ]
+}
