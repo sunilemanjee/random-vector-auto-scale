@@ -36,3 +36,44 @@ PUT _ingest/pipeline/add-timestamp
     }
   ]
 }
+
+delete _index_template/index
+
+
+PUT _index_template/index
+{
+  "index_patterns": ["index"],
+  "data_stream": { },
+  "template": {
+    "settings": {
+      "index.default_pipeline": "add-timestamp",
+      "refresh_interval" : "1s"
+    },
+    "mappings": {
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "emb": {
+          "type": "dense_vector",
+          "dims": 1596,
+          "index": true,
+          "similarity": "cosine",
+          "index_options": {
+            "type": "flat"
+          }
+        },
+        "partition_id": {
+          "type": "keyword"
+        }
+      }
+    }
+  },
+  "priority": 200
+}
+
+
+DELETE _data_stream/index
+
+PUT _data_stream/index
+

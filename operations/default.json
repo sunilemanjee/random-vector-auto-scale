@@ -4,6 +4,51 @@
   "include-in-reporting": false
 },
 {
+  "name": "delete-data-stream",
+  "operation-type": "raw-request",
+  "method": "DELETE",
+  "path": "/_data_stream/index",
+  "ignore": [404],
+  "include-in-reporting": false
+},
+{
+  "name": "create-data-stream",
+  "operation-type": "raw-request",
+  "method": "PUT",
+  "path": "/_data_stream/index",
+  "body": {
+    "index_patterns": ["index"],
+    "data_stream": { },
+    "template": {
+      "settings": {
+        "index.default_pipeline": "add-timestamp",
+        "refresh_interval" : "1s"
+      },
+      "mappings": {
+        "properties": {
+          "@timestamp": {
+            "type": "date"
+          },
+          "emb": {
+            "type": "dense_vector",
+            "dims": 1596,
+            "index": true,
+            "similarity": "cosine",
+            "index_options": {
+              "type": "flat"
+            }
+          },
+          "partition_id": {
+            "type": "keyword"
+          }
+        }
+      }
+    },
+    "priority": 200
+  },
+  "include-in-reporting": false
+},
+{
   "name": "create-index",
   "operation-type": "create-index",
   "include-in-reporting": false
@@ -34,3 +79,18 @@
   "dims": {{ dims | default(128) | int }},
   "partitions": {{ partitions | default(1000) | int }}
 }
+{%- set p_as_ingest_clients = (as_ingest_clients )%}
+{%- set p_as_ingest_target_throughputs = (as_ingest_target_throughputs )%}
+{%- set p_as_ingest_index_iterations = (as_ingest_index_iterations )%}
+{%- set p_as_ingest_bulk_size = (as_ingest_bulk_size )%}
+{%- for i in range(p_as_ingest_clients|length) %},
+{
+  "name": "random-bulk-indexing-{{loop.index}}-c{{p_as_ingest_clients[i]}}-b{{p_as_ingest_bulk_size[i]}}-tt{{p_as_ingest_target_throughputs[i]}}-it{{p_as_ingest_index_iterations[i]}}",
+  "operation-type": "bulk",
+  "refresh": "wait_for",
+  "param-source": "random-bulk-param-source",
+  "dims": {{ dims | default(128) | int }},
+  "partitions": {{ partitions | default(1000) | int }},
+  "routing": {{ routing | default(false) | tojson }},
+  "bulk-size": {{ p_as_ingest_bulk_size[i] }}}
+{%- endfor %}

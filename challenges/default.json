@@ -1,7 +1,7 @@
 {
   "name": "index-and-search",
   "description": "Create an index and index doc with random content into it.",
-  "default": true,
+  "default": false,
   "schedule": [
     {
       "name": "delete-index",
@@ -67,7 +67,7 @@
 {
   "name": "ingest-autoscale",
   "description": "Benchmark bulk indexing with configurable steps",
-  "default": false,
+  "default": true,
   "schedule": [
     {{ rally.collect(parts="common/ingest-autoscale-schedule.json") }}
   ]
