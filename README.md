@@ -155,3 +155,25 @@ This simulates:
 ### index-and-search
 
 This challenge is still available but is no longer the default. It creates an index and indexes documents with random content, then runs various search operations.
+
+## Running the Track
+
+To run the random_vector track with autoscaling parameters, use the following example command:
+
+```bash
+esrally race --track-path=/root/rally-tracks/random_vector \
+  --target-hosts=$eshost \
+  --track-params=random-vector-params.json \
+  --pipeline=benchmark-only \
+  --client-options="use_ssl:true,verify_certs:false,api_key:$apikey" \
+  --kill-running-processes
+```
+
+- `--track-path`: Path to the local track directory.
+- `--target-hosts`: Comma-separated list of Elasticsearch hosts (set `$eshost` to your cluster endpoint).
+- `--track-params`: Path to your parameter file (e.g., `random-vector-params.json`).
+- `--pipeline`: Use `benchmark-only` for running benchmarks without setup/teardown.
+- `--client-options`: Connection options (SSL, cert verification, API key, etc.).
+- `--kill-running-processes`: Ensures any previous Rally processes are stopped before starting.
+
+Adjust the parameters as needed for your environment and workload.
