@@ -1,5 +1,5 @@
 {
-  "name": "put-timestamp-pipeline",
+  "name": "create-ingest-pipeline",
   "operation": {
     "operation-type": "put-pipeline",
     "id": "add-timestampe",
