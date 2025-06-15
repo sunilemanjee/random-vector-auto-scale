@@ -2,6 +2,10 @@
 
 This track is designed for benchmarking filtered search on random vectors.
 
+**Default Challenge:**
+
+As of the latest update, the default challenge is now `ingest-autoscale`, which benchmarks bulk indexing with configurable steps and simulates auto-scaled workloads. This challenge is designed to test how the system handles bursty or variable ingest rates, using arrays of parameters to simulate changes in load and client concurrency.
+
 By default, the `flat` vector_index_type is utilized to evaluate the performance
 of brute force search over vectors filtered by a partition ID.
 
@@ -76,6 +80,23 @@ This simulates:
 - 2nd phase: ~20,000 docs/sec (20 clients, 24 bulks/sec, 18 docs/bulk)
 - 3rd phase: ~7,000 docs/sec (10 clients, 8 bulks/sec, 18 docs/bulk)
 
+#### Additional Example: Autoscaling with Multiple Phases
+
+The following parameter file demonstrates autoscaling with four phases, each with different client counts, throughputs, and iteration counts:
+
+```
+{
+    "vector_index_type": "flat",
+     "dims": 1596,
+     "as_ingest_clients" : [10,20,10,20],
+     "as_ingest_bulk_size": [18,18,18,18],
+     "as_ingest_target_throughputs": [8,24,4,25],
+     "as_ingest_index_iterations": [100,50000,3000,20000]
+}
+```
+
+This configuration will run four ingest phases, simulating changes in load and system scaling over time.
+
 #### Partitions
 
 - More partitions = more parallelism, but also more overhead.
@@ -105,3 +126,32 @@ For example, to write 100,000 documents with a bulk size of 20:
 - Total documents = 5,000 iterations × 20 docs/bulk = 100,000 documents
 
 You can adjust `index_bulk_size` and `index_iterations` as long as their product equals your desired total document count.
+
+## Challenges
+
+### ingest-autoscale (default)
+
+This is now the default challenge. It benchmarks bulk indexing with configurable steps, simulating auto-scaled or bursty workloads. You can control the number of clients, bulk sizes, target throughputs, and iteration counts for each phase of the workload. The challenge is defined in `challenges/default.json` and uses the schedule in `challenges/common/ingest-autoscale-schedule.json`.
+
+Example parameters for autoscale:
+
+```
+{
+    "vector_index_type": "flat",
+    "dims": 1596,
+    "partitions": 1000,
+    "as_ingest_clients": [10, 20, 10],
+    "as_bulk_size": [18, 18, 18],
+    "as_ingest_target_throughputs": [8, 24, 8],
+    "as_parallel_index_iterations": [5000, 50000, 5000]
+}
+```
+
+This simulates:
+- 1st phase: ~7,000 docs/sec (10 clients, 8 bulks/sec, 18 docs/bulk)
+- 2nd phase: ~20,000 docs/sec (20 clients, 24 bulks/sec, 18 docs/bulk)
+- 3rd phase: ~7,000 docs/sec (10 clients, 8 bulks/sec, 18 docs/bulk)
+
+### index-and-search
+
+This challenge is still available but is no longer the default. It creates an index and indexes documents with random content, then runs various search operations.
