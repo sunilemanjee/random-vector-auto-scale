@@ -158,7 +158,20 @@ This challenge is still available but is no longer the default. It creates an in
 
 ## Running the Track
 
-To run the random_vector track with autoscaling parameters, use the following example command:
+To run the random_vector track with autoscaling parameters, you first need to create a parameter file (e.g., `random-vector-params.json`) with your desired settings. For example:
+
+```
+{
+    "vector_index_type": "flat",
+    "dims": 1596,
+    "as_ingest_clients" : [10,20,10,20],
+    "as_ingest_bulk_size": [18,18,18,18],
+    "as_ingest_target_throughputs": [8,24,4,25],
+    "as_ingest_index_iterations": [100,50000,3000,20000]
+}
+```
+
+Then, use the following example command:
 
 ```bash
 esrally race --track-path=/root/rally-tracks/random_vector \
