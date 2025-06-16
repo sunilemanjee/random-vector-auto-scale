@@ -51,7 +51,13 @@ This track supports simulating bursty or auto-scaled workloads by specifying arr
 | `as_ingest_clients`             | List of client counts for each phase of the workload                                         |
 | `as_bulk_size`                  | List of bulk sizes (docs per request) for each phase                                         |
 | `as_ingest_target_throughputs`  | List of target bulk requests/sec for each phase                                              |
-| `as_parallel_index_iterations`  | List of iteration counts (number of bulks to send) for each phase                           |
+| `as_ingest_index_iterations`    | List of iteration counts (number of bulks to send) for each phase                           |
+| `parallel_indexing_clients`     | Number of clients for parallel indexing operations                                           |
+| `parallel_ingest_target_throughputs` | Target throughput for parallel indexing operations                                      |
+| `parallel_indexing_iterations`  | Number of iterations for parallel indexing operations                                        |
+| `parallel_indexing_bulk_size`   | Bulk size for parallel indexing operations                                                   |
+| `parallel_search_clients`       | Number of clients for parallel search operations                                             |
+| `parallel_search_iterations`    | Number of iterations for parallel search operations                                          |
 
 #### Key Formulas
 
@@ -67,18 +73,23 @@ This track supports simulating bursty or auto-scaled workloads by specifying arr
 {
     "vector_index_type": "flat",
     "dims": 1596,
-    "partitions": 1000,
-    "as_ingest_clients": [10, 20, 10],
-    "as_bulk_size": [18, 18, 18],
-    "as_ingest_target_throughputs": [8, 24, 8],
-    "as_parallel_index_iterations": [5000, 50000, 5000]
+    "as_ingest_clients": [10, 20, 10, 20, 10, 20],
+    "as_ingest_bulk_size": [18, 18, 18, 18, 18, 18],
+    "as_ingest_target_throughputs": [8, 24, 4, 25, 8, 24],
+    "as_ingest_index_iterations": [2500, 5000, 1500, 7000, 2200, 10000],
+    "parallel_indexing_clients": 1,
+    "parallel_ingest_target_throughputs": 1,
+    "parallel_indexing_iterations": 10,
+    "parallel_indexing_bulk_size": 10,
+    "parallel_search_clients": 10,
+    "parallel_search_iterations": 10
 }
 ```
 
-This simulates:
-- 1st phase: ~7,000 docs/sec (10 clients, 8 bulks/sec, 18 docs/bulk)
-- 2nd phase: ~20,000 docs/sec (20 clients, 24 bulks/sec, 18 docs/bulk)
-- 3rd phase: ~7,000 docs/sec (10 clients, 8 bulks/sec, 18 docs/bulk)
+This configuration includes both auto-scaling phases and parallel operations:
+- Auto-scaling phases with varying client counts, throughputs, and iterations
+- Parallel indexing with 1 client, targeting 1 bulk/sec
+- Parallel search with 10 clients, running 10 iterations each
 
 #### Additional Example: Autoscaling with Multiple Phases
 
@@ -131,7 +142,19 @@ You can adjust `index_bulk_size` and `index_iterations` as long as their product
 
 ### ingest-autoscale (default)
 
-This is now the default challenge. It benchmarks bulk indexing with configurable steps, simulating auto-scaled or bursty workloads. You can control the number of clients, bulk sizes, target throughputs, and iteration counts for each phase of the workload. The challenge is defined in `challenges/default.json` and uses the schedule in `challenges/common/ingest-autoscale-schedule.json`.
+This is now the default challenge. It benchmarks bulk indexing with configurable steps, simulating auto-scaled or bursty workloads. The challenge includes both sequential auto-scaling phases and parallel operations for both indexing and search. You can control:
+
+1. Auto-scaling parameters:
+   - Number of clients
+   - Bulk sizes
+   - Target throughputs
+   - Iteration counts for each phase
+
+2. Parallel operations:
+   - Parallel indexing with configurable clients and throughput
+   - Parallel search with configurable clients and iterations
+
+The challenge is defined in `challenges/default.json` and uses the schedule in `challenges/common/ingest-autoscale-schedule.json`.
 
 Example parameters for autoscale:
 

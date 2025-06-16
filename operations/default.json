@@ -4,6 +4,22 @@
   "include-in-reporting": false
 },
 {
+  "name": "create-ingest-pipeline",
+  "operation-type": "put-pipeline",
+  "id": "add-timestamp",
+  "body": {
+    "processors": [
+      {
+        "set": {
+          "field": "@timestamp",
+          "value": {{'"{{_ingest.timestamp}}"'}}
+        }
+      }
+    ]
+  },
+  "include-in-reporting": false
+},
+{
   "name": "delete-data-stream",
   "operation-type": "raw-request",
   "method": "DELETE",
@@ -12,10 +28,18 @@
   "include-in-reporting": false
 },
 {
-  "name": "create-data-stream",
+  "name": "delete-data-stream-template",
+  "operation-type": "raw-request",
+  "method": "DELETE",
+  "ignore": [404],
+  "path": "/_index_template/index",
+  "include-in-reporting": false
+},
+{
+  "name": "create-data-stream-template",
   "operation-type": "raw-request",
   "method": "PUT",
-  "path": "/_data_stream/index",
+  "path": "/_index_template/index",
   "body": {
     "index_patterns": ["index"],
     "data_stream": { },
@@ -46,6 +70,13 @@
     },
     "priority": 200
   },
+  "include-in-reporting": false
+},
+{
+  "name": "create-data-stream",
+  "operation-type": "raw-request",
+  "method": "PUT",
+  "path": "/_data_stream/index",
   "include-in-reporting": false
 },
 {

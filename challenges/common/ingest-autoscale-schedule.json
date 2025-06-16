@@ -1,23 +1,18 @@
 {
   "name": "create-ingest-pipeline",
-  "operation": {
-    "operation-type": "put-pipeline",
-    "id": "add-timestampe",
-    "body": {
-      "processors": [
-          {
-              "set": {
-                  "field": "@timestamp",
-                  "value": {{'"{{_ingest.timestamp}}"'}}
-              }
-          }
-      ]
-    }
-  }
+  "operation": "create-ingest-pipeline"
 },
 {
   "name": "delete-data-stream",
   "operation": "delete-data-stream"
+},
+{
+  "name": "delete-data-stream-template",
+  "operation": "delete-data-stream-template"
+},
+{
+  "name": "create-data-stream-template",
+  "operation": "create-data-stream-template"
 },
 {
   "name": "create-data-stream",
@@ -31,15 +26,45 @@
 {%- set p_as_ingest_clients = (as_ingest_clients | default([1,2,4,8,16]))%}
 {%- set p_as_ingest_bulk_size = (as_ingest_bulk_size | default([18,18,18,18]))%}
 {%- set p_as_ingest_index_iterations = (as_ingest_index_iterations | default([5000,50000,5000,50000]))%}
+{%- set p_as_parallel_search_iterations = (parallel_search_iterations | default(10) )%}
+{%- set p_as_parallel_indexing_clients = (parallel_indexing_clients | default(1))%}
+{%- set p_as_parallel_ingest_target_throughputs = (parallel_ingest_target_throughputs | default(1))%}
+{%- set p_as_parallel_indexing_iterations = (parallel_indexing_iterations | default(10))%}
+{%- set p_as_parallel_indexing_bulk_size = (parallel_indexing_bulk_size | default(10))%}
+{%- set p_as_parallel_search_clients = (parallel_search_clients | default(10))%}
 {%- for i in range(p_as_ingest_clients|length) %},
-  {
-    "name": "ingest-{{loop.index}}-c{{p_as_ingest_clients[i]}}-b{{p_as_ingest_bulk_size[i]}}-tt{{p_as_ingest_target_throughputs[i]}}-it{{p_as_ingest_index_iterations[i]}}",
-    "operation": "random-bulk-indexing-{{loop.index}}-c{{p_as_ingest_clients[i]}}-b{{p_as_ingest_bulk_size[i]}}-tt{{p_as_ingest_target_throughputs[i]}}-it{{p_as_ingest_index_iterations[i]}}",
-    "target-throughput":  {{p_as_ingest_target_throughputs[i]}},
-    "clients": {{ p_as_ingest_clients[i] | default(1) | int }},
-    "iterations": {{ p_as_ingest_index_iterations[i]}},
-    "bulk-size": {{ p_as_ingest_bulk_size[i]}},
-    "iterations": {{ p_as_ingest_index_iterations[i] | default(1000) | int }},
-    "looped": true
-  }
+    {
+      "name": "ingest-{{loop.index}}-c{{p_as_ingest_clients[i]}}-b{{p_as_ingest_bulk_size[i]}}-tt{{p_as_ingest_target_throughputs[i]}}-it{{p_as_ingest_index_iterations[i]}}",
+      "operation": "random-bulk-indexing-{{loop.index}}-c{{p_as_ingest_clients[i]}}-b{{p_as_ingest_bulk_size[i]}}-tt{{p_as_ingest_target_throughputs[i]}}-it{{p_as_ingest_index_iterations[i]}}",
+      "target-throughput":  {{p_as_ingest_target_throughputs[i]}},
+      "clients": {{ p_as_ingest_clients[i] | default(1) | int }},
+      "iterations": {{ p_as_ingest_index_iterations[i]}},
+      "bulk-size": {{ p_as_ingest_bulk_size[i]}},
+      "iterations": {{ p_as_ingest_index_iterations[i] | default(1000) | int }},
+      "looped": true
+    }
+
 {%- endfor %}
+,{
+  "parallel": {
+    "completed-by": "parallel-random-indexing",
+    "tasks": [
+      {
+        "name": "parallel-random-indexing",
+        "operation": "random-bulk-indexing",
+        "clients": {{ p_as_parallel_indexing_clients | default(1) | int }},
+        "target-throughput":  {{p_as_parallel_ingest_target_throughputs | default(1) | int}},
+        "iterations": {{ p_as_parallel_indexing_iterations | default(10) | int }},
+        "bulk-size": {{ p_as_parallel_indexing_bulk_size | default(10)}}
+      },
+      {
+        "name": "parallel-knn-filtered-search-multiple-client",
+        "operation": "brute-force-filtered-search",
+        "script": false,
+        "warmup-iterations": 100,
+        "iterations": {{ p_as_parallel_search_iterations | default(10) | int }},
+        "clients": {{ p_as_parallel_search_clients | default(1) | int }}
+      }
+    ]
+  }
+}
