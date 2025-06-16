@@ -45,8 +45,17 @@
     "data_stream": { },
     "template": {
       "settings": {
+        {# non-serverless-index-settings-marker-start #}{%- if build_flavor != "serverless" or serverless_operator == true -%}
+        "number_of_shards": {{number_of_shards | default(1)}},
+        "number_of_replicas": {{number_of_replicas | default(0)}},
+        "mapping.source.mode": "synthetic",
+        "index.recovery.use_synthetic_source": true,
+        {%- endif -%}{# non-serverless-index-settings-marker-end #}
         "index.default_pipeline": "add-timestamp",
-        "refresh_interval" : "1s"
+        "refresh_interval" : "1s",
+        "sort": {
+          "field": "partition_id"
+        }
       },
       "mappings": {
         "properties": {
@@ -59,7 +68,7 @@
             "index": true,
             "similarity": "cosine",
             "index_options": {
-              "type": "flat"
+              "type": {{ vector_index_type | default("flat") | tojson }}
             }
           },
           "partition_id": {

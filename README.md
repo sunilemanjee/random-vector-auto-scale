@@ -213,3 +213,57 @@ esrally race --track-path=/root/rally-tracks/random_vector \
 - `--kill-running-processes`: Ensures any previous Rally processes are stopped before starting.
 
 Adjust the parameters as needed for your environment and workload.
+
+# Ingest Autoscale Schedule Parameters
+
+This document describes the parameters used in the ingest autoscale schedule for vector indexing and search operations.
+
+## Vector Index Configuration
+- **Vector Index Type**: `flat`
+- **Dimensions**: `1596`
+
+## Ingest Parameters
+The ingest operations are configured with the following parameters:
+
+### Client Configuration
+- **Ingest Clients**: `[10, 20, 10, 20, 10, 20]`
+  - Number of clients for each ingest operation phase
+
+### Bulk Size
+- **Ingest Bulk Size**: `[18, 18, 18, 18, 18, 18]`
+  - Number of documents per bulk request for each phase
+
+### Target Throughput
+- **Ingest Target Throughputs**: `[8, 24, 4, 25, 8, 24]`
+  - Target throughput (operations per second) for each phase
+
+### Iterations
+- **Ingest Index Iterations**: `[2500, 5000, 1500, 7000, 2200, 10000]`
+  - Number of iterations for each ingest phase
+
+## Parallel Operations Configuration
+
+### Time Periods
+- **Warmup Time Periods**: `10`
+- **Time Periods**: `10`
+
+### Parallel Indexing
+- **Parallel Indexing Clients**: `1`
+- **Parallel Ingest Target Throughputs**: `1`
+- **Parallel Indexing Bulk Size**: `10`
+
+### Parallel Search
+- **Parallel Search Clients**: `10`
+
+## Schedule Structure
+The schedule consists of the following operations in sequence:
+1. Create ingest pipeline
+2. Delete data stream
+3. Delete data stream template
+4. Create data stream template
+5. Create data stream
+6. Check cluster health
+7. Multiple ingest operations with varying parameters
+8. Parallel operations including:
+   - Random bulk indexing
+   - KNN filtered search with multiple clients

@@ -5,10 +5,10 @@
      "as_ingest_bulk_size": [18,18,18,18,18,18],
      "as_ingest_target_throughputs": [8,24,4,25,8,24],
      "as_ingest_index_iterations": [2500,5000,1500,7000,2200,10000],
+     "parallel_warmup_time_periods": 10,
+     "parallel_time_periods": 10,
      "parallel_indexing_clients": 1,
      "parallel_ingest_target_throughputs": 1,
-     "parallel_indexing_iterations": 10,
      "parallel_indexing_bulk_size": 10,
-     "parallel_search_clients": 10,
-     "parallel_search_iterations": 10
-}
+     "parallel_search_clients": 10
+    }

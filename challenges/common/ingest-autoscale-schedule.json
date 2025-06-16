@@ -26,11 +26,11 @@
 {%- set p_as_ingest_clients = (as_ingest_clients | default([1,2,4,8,16]))%}
 {%- set p_as_ingest_bulk_size = (as_ingest_bulk_size | default([18,18,18,18]))%}
 {%- set p_as_ingest_index_iterations = (as_ingest_index_iterations | default([5000,50000,5000,50000]))%}
-{%- set p_as_parallel_search_iterations = (parallel_search_iterations | default(10) )%}
 {%- set p_as_parallel_indexing_clients = (parallel_indexing_clients | default(1))%}
 {%- set p_as_parallel_ingest_target_throughputs = (parallel_ingest_target_throughputs | default(1))%}
-{%- set p_as_parallel_indexing_iterations = (parallel_indexing_iterations | default(10))%}
 {%- set p_as_parallel_indexing_bulk_size = (parallel_indexing_bulk_size | default(10))%}
+{%- set p_as_parallel_warmup_time_periods = (parallel_warmup_time_periods | default(10))%}
+{%- set p_as_parallel_time_periods = (parallel_time_periods | default(10))%}
 {%- set p_as_parallel_search_clients = (parallel_search_clients | default(10))%}
 {%- for i in range(p_as_ingest_clients|length) %},
     {
@@ -54,16 +54,17 @@
         "operation": "random-bulk-indexing",
         "clients": {{ p_as_parallel_indexing_clients | default(1) | int }},
         "target-throughput":  {{p_as_parallel_ingest_target_throughputs | default(1) | int}},
-        "iterations": {{ p_as_parallel_indexing_iterations | default(10) | int }},
-        "bulk-size": {{ p_as_parallel_indexing_bulk_size | default(10)}}
+        "bulk-size": {{ p_as_parallel_indexing_bulk_size | default(10)}},        
+        "warmup-time-period": {{p_as_parallel_warmup_time_periods}},
+        "time-period": {{p_as_parallel_time_periods}}
       },
       {
         "name": "parallel-knn-filtered-search-multiple-client",
         "operation": "brute-force-filtered-search",
         "script": false,
-        "warmup-iterations": 100,
-        "iterations": {{ p_as_parallel_search_iterations | default(10) | int }},
-        "clients": {{ p_as_parallel_search_clients | default(1) | int }}
+        "clients": {{ p_as_parallel_search_clients | default(1) | int }},
+        "warmup-time-period": {{p_as_parallel_warmup_time_periods}},
+        "time-period": {{p_as_parallel_time_periods}}
       }
     ]
   }
