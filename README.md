@@ -206,12 +206,19 @@ To run the random_vector track with autoscaling parameters, you first need to cr
 Then, use the following example command:
 
 ```bash
-esrally race --track-path=/root/rally-tracks/random_vector \
-  --target-hosts=$eshost \
-  --track-params=random-vector-params.json \
-  --pipeline=benchmark-only \
-  --client-options="use_ssl:true,verify_certs:false,api_key:$apikey" \
-  --kill-running-processes
+# Set required environment variables
+export eshost="your-elasticsearch-endpoint:9200"
+export apikey="your-api-key"
+
+# Run the benchmark
+esrally race --track-path=/root/random-vector-auto-scale \
+ --target-hosts=$eshost \
+ --track-params=random-vector-params.json \
+ --pipeline=benchmark-only \
+ --client-options="use_ssl:true,verify_certs:false,api_key:$apikey" \
+ --kill-running-processes \
+ --include-tasks="create-ingest-pipeline,delete-data-stream,delete-data-stream-template,create-data-stream-template,create-data-stream" \
+ --test-mode
 ```
 
 - `--track-path`: Path to the local track directory.
@@ -220,6 +227,12 @@ esrally race --track-path=/root/rally-tracks/random_vector \
 - `--pipeline`: Use `benchmark-only` for running benchmarks without setup/teardown.
 - `--client-options`: Connection options (SSL, cert verification, API key, etc.).
 - `--kill-running-processes`: Ensures any previous Rally processes are stopped before starting.
+- `--include-tasks`: Specifies which tasks to include in the benchmark.
+- `--test-mode`: Runs the benchmark in test mode for quick validation.
+
+**Note**: Before running the benchmark, make sure to set the required environment variables:
+- `eshost`: Your Elasticsearch cluster endpoint (e.g., "https://your-cluster.elastic.co:9200")
+- `apikey`: Your Elasticsearch API key for authentication
 
 This configuration will run six ingest phases with varying client counts, throughputs, and iterations, followed by parallel operations for both indexing and search. The workload simulates:
 - Multiple phases of varying intensity (8-25 bulk requests/sec)
