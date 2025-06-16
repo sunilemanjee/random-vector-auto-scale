@@ -77,19 +77,22 @@ This track supports simulating bursty or auto-scaled workloads by specifying arr
     "as_ingest_bulk_size": [18, 18, 18, 18, 18, 18],
     "as_ingest_target_throughputs": [8, 24, 4, 25, 8, 24],
     "as_ingest_index_iterations": [2500, 5000, 1500, 7000, 2200, 10000],
+    "parallel_warmup_time_periods": 10,
+    "parallel_time_periods": 10,
     "parallel_indexing_clients": 1,
     "parallel_ingest_target_throughputs": 1,
-    "parallel_indexing_iterations": 10,
     "parallel_indexing_bulk_size": 10,
-    "parallel_search_clients": 10,
-    "parallel_search_iterations": 10
+    "parallel_search_clients": 10
 }
 ```
 
-This configuration includes both auto-scaling phases and parallel operations:
-- Auto-scaling phases with varying client counts, throughputs, and iterations
-- Parallel indexing with 1 client, targeting 1 bulk/sec
-- Parallel search with 10 clients, running 10 iterations each
+This configuration will run six ingest phases with varying client counts, throughputs, and iterations, followed by parallel operations for both indexing and search. The workload simulates:
+- Multiple phases of varying intensity (8-25 bulk requests/sec)
+- Different client concurrency levels (10-20 clients)
+- Consistent bulk sizes (18 documents per bulk)
+- Parallel operations with 1 indexing client and 10 search clients
+
+Adjust the parameters as needed for your environment and workload.
 
 #### Additional Example: Autoscaling with Multiple Phases
 
@@ -183,14 +186,20 @@ This challenge is still available but is no longer the default. It creates an in
 
 To run the random_vector track with autoscaling parameters, you first need to create a parameter file (e.g., `random-vector-params.json`) with your desired settings. For example:
 
-```
+```json
 {
     "vector_index_type": "flat",
     "dims": 1596,
-    "as_ingest_clients" : [10,20,10,20],
-    "as_ingest_bulk_size": [18,18,18,18],
-    "as_ingest_target_throughputs": [8,24,4,25],
-    "as_ingest_index_iterations": [100,50000,3000,20000]
+    "as_ingest_clients": [10, 20, 10, 20, 10, 20],
+    "as_ingest_bulk_size": [18, 18, 18, 18, 18, 18],
+    "as_ingest_target_throughputs": [8, 24, 4, 25, 8, 24],
+    "as_ingest_index_iterations": [2500, 5000, 1500, 7000, 2200, 10000],
+    "parallel_warmup_time_periods": 10,
+    "parallel_time_periods": 10,
+    "parallel_indexing_clients": 1,
+    "parallel_ingest_target_throughputs": 1,
+    "parallel_indexing_bulk_size": 10,
+    "parallel_search_clients": 10
 }
 ```
 
@@ -211,6 +220,12 @@ esrally race --track-path=/root/rally-tracks/random_vector \
 - `--pipeline`: Use `benchmark-only` for running benchmarks without setup/teardown.
 - `--client-options`: Connection options (SSL, cert verification, API key, etc.).
 - `--kill-running-processes`: Ensures any previous Rally processes are stopped before starting.
+
+This configuration will run six ingest phases with varying client counts, throughputs, and iterations, followed by parallel operations for both indexing and search. The workload simulates:
+- Multiple phases of varying intensity (8-25 bulk requests/sec)
+- Different client concurrency levels (10-20 clients)
+- Consistent bulk sizes (18 documents per bulk)
+- Parallel operations with 1 indexing client and 10 search clients
 
 Adjust the parameters as needed for your environment and workload.
 
